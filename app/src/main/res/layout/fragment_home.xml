@@ -1,0 +1,38 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="fragments.HomeFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/btnFirstMovie"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_margin="20dp">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imgFirstMovie"
+                android:src="@drawable/no_img"/>
+
+            <TextView
+                android:id="@+id/lblFirstMovie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="No Movie"
+                android:textColor="#FFFFFF"
+                android:textAlignment="textStart"
+                android:textSize="25dp"
+                android:layout_margin="20dp"/>
+        </RelativeLayout>
+        <ListView
+            android:id="@+id/lstMovies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</FrameLayout>
