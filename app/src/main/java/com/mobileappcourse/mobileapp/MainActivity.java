@@ -35,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
                     switch (item.getItemId()) {
                         // Each item clicked initiate the correspondent fragment
                         case R.id.nav_home:
-                            selectedFragment = new HomeFragment();
+                            // Initialized a HomeFragment from singleton mode to send context for
+                            //  API fetching.
+                            selectedFragment = HomeFragment.newInstance(getApplicationContext());
                             break;
                         case R.id.nav_favorite:
                             selectedFragment = new FavoriteFragment();
