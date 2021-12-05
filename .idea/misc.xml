@@ -6,6 +6,7 @@
         <entry key="app/src/main/res/drawable/date.xml" value="0.2359375" />
         <entry key="app/src/main/res/drawable/review.xml" value="0.2359375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3736413043478261" />
+        <entry key="app/src/main/res/layout/activity_movie.xml" value="0.21614583333333334" />
         <entry key="app/src/main/res/layout/fragment_category.xml" value="0.23020833333333332" />
         <entry key="app/src/main/res/layout/fragment_favorite.xml" value="0.23020833333333332" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.21614583333333334" />

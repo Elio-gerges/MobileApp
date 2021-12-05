@@ -1,6 +1,7 @@
 package fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -20,6 +21,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.mobileappcourse.api.APIRequest;
 import com.mobileappcourse.beans.Movie;
+import com.mobileappcourse.mobileapp.MovieActivity;
 import com.mobileappcourse.mobileapp.R;
 import com.mobileappcourse.utilities.Constants;
 import com.squareup.picasso.Picasso;
@@ -39,6 +41,8 @@ public class HomeFragment extends Fragment {
     private final String TAG = "HomeFragment";
 
     private ArrayList<Movie> movies = new ArrayList<Movie>();
+
+    private int movieTotal;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -63,8 +67,6 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
-    private int movieTotal;
-
     private void getAPIData() {
         Response.Listener<JSONObject> jsonObjectListener = new Response.Listener<JSONObject>() {
             @Override
@@ -72,11 +74,11 @@ public class HomeFragment extends Fragment {
                 try {
                     JSONArray moviesData = response.getJSONArray("results");
                     movieTotal = response.getInt("count");
-                    for (int i = 0; i < moviesData.length(); i++) {
+                    for (int i = 0; i < movieTotal; i++) {
                         getMovieDataFromAPI(moviesData.getJSONObject(i).getString("imdb_id"));
                     }
-                    ListView moviesList = (ListView) getView().findViewById(R.id.lstMovies);
-                    moviesList.setAdapter(new MovieAdapter(mcontext, movies));
+                    ListView moviesList = getView().findViewById(R.id.lstMovies);
+                    moviesList.setAdapter(new MovieAdapter(mcontext, movies, movieTotal));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -123,8 +125,18 @@ public class HomeFragment extends Fragment {
                     movie.setTitle(movieObject.getString("title"));
                     movie.setImage_url(movieObject.getString("image_url"));
                     movie.setRelease(movieObject.getString("release"));
-                    movies.add(movie);
-                    ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
+                    boolean found = false;
+                    for (int i = 0; i < movies.size(); i++) {
+                        if(movies.get(i).getId().equals(movie.getId())) {
+                            found = true;
+                        }
+                    }
+                    if (found == false) {
+                        movies.add(movie);
+                        if (movies.size() == movieTotal) {
+                            ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
+                        }
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -160,13 +172,14 @@ public class HomeFragment extends Fragment {
 
     private static class MovieAdapter extends BaseAdapter {
 
+        private int total;
         private Context context; // Context
         private ArrayList<Movie> items; // Data source of the list adapter
         private static BaseAdapter adapter;
         private static int done;
 
         // Public constructor
-        public MovieAdapter(Context context, ArrayList<Movie> items) {
+        public MovieAdapter(Context context, ArrayList<Movie> items, int total) {
             this.context = context;
             this.items = items;
             this.adapter = this;
@@ -193,12 +206,18 @@ public class HomeFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+//            if(total == 0) {
+//                for (int i = 0; i < items.size(); i++) {
+//                    Log.d("getView", "Movie " + i + " is:" + items.get(i).getTitle());
+//                }
+//                total++;
+//            }
             // Inflate the layout for each list row
             if (convertView == null) {
-                if ( position == 0 && done <= 0) {
+                if (done == 0) {
                     // Display big first movie
-                    convertView = LayoutInflater.from(context).
-                            inflate(R.layout.movie_banner, parent, false);
+                    convertView = LayoutInflater.from(parent.getContext())
+                                    .inflate(R.layout.movie_banner, parent, false);
 
                     // get current item to be displayed
                     Movie currentItem = (Movie) getItem(position);
@@ -214,8 +233,8 @@ public class HomeFragment extends Fragment {
                     done++;
                 } else {
                     // Display regular movies
-                    convertView = LayoutInflater.from(context).
-                            inflate(R.layout.movie, parent, false);
+                    convertView = LayoutInflater.from(parent.getContext())
+                                    .inflate(R.layout.movie, parent, false);
 
                     // get current item to be displayed
                     Movie currentItem = (Movie) getItem(position);
@@ -240,6 +259,15 @@ public class HomeFragment extends Fragment {
                     Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
                 }
             }
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent movieIntent = new Intent(mcontext, MovieActivity.class);
+//                    intent.putExtra(EXTRA_MESSAGE, message);
+                    mcontext.startActivity(movieIntent);
+                }
+            });
 
             // returns the view for the current row
             return convertView;
