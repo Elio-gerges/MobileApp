@@ -47,7 +47,6 @@ public class HomeFragment extends Fragment {
 
     public static HomeFragment newInstance(Context context) {
         HomeFragment fragment = new HomeFragment();
-        Log.d("HomeFragment", context.toString());
         mcontext = context;
         return fragment;
     }
@@ -64,12 +63,15 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    private int movieTotal;
+
     private void getAPIData() {
         Response.Listener<JSONObject> jsonObjectListener = new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray moviesData = response.getJSONArray("results");
+                    movieTotal = response.getInt("count");
                     for (int i = 0; i < moviesData.length(); i++) {
                         getMovieDataFromAPI(moviesData.getJSONObject(i).getString("imdb_id"));
                     }
@@ -108,8 +110,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private static int counter;
-
     private void getMovieDataFromAPI(String id) {
         Response.Listener<JSONObject> jsonObjectListener = new Response.Listener<JSONObject>() {
             @Override
@@ -123,19 +123,8 @@ public class HomeFragment extends Fragment {
                     movie.setTitle(movieObject.getString("title"));
                     movie.setImage_url(movieObject.getString("image_url"));
                     movie.setRelease(movieObject.getString("release"));
-
-                    if (counter == 2) {
-                        ImageView imageViewMovie = (ImageView)
-                                getView().findViewById(R.id.imgFirstMovie);
-                        TextView textViewMovieName = (TextView)
-                                getView().findViewById(R.id.lblFirstMovie);
-                        textViewMovieName.setText(movie.getTitle());
-                        Picasso.get().load(movie.getImage_url()).into(imageViewMovie);
-                    } else {
-                        movies.add(movie);
-                        ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
-                    }
-                    counter++;
+                    movies.add(movie);
+                    ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -174,6 +163,7 @@ public class HomeFragment extends Fragment {
         private Context context; // Context
         private ArrayList<Movie> items; // Data source of the list adapter
         private static BaseAdapter adapter;
+        private static int done;
 
         // Public constructor
         public MovieAdapter(Context context, ArrayList<Movie> items) {
@@ -205,31 +195,51 @@ public class HomeFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             // Inflate the layout for each list row
             if (convertView == null) {
-                convertView = LayoutInflater.from(context).
-                        inflate(R.layout.movie, parent, false);
+                if ( position == 0 && done <= 0) {
+                    // Display big first movie
+                    convertView = LayoutInflater.from(context).
+                            inflate(R.layout.movie_banner, parent, false);
+
+                    // get current item to be displayed
+                    Movie currentItem = (Movie) getItem(position);
+
+                    // get the TextView for item name and item description
+                    ImageView imageViewMovie = (ImageView)
+                            convertView.findViewById(R.id.imgFirstMovie);
+                    TextView textViewMovieName = (TextView)
+                            convertView.findViewById(R.id.lblFirstMovie);
+
+                    textViewMovieName.setText(currentItem.getTitle());
+                    Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
+                    done++;
+                } else {
+                    // Display regular movies
+                    convertView = LayoutInflater.from(context).
+                            inflate(R.layout.movie, parent, false);
+
+                    // get current item to be displayed
+                    Movie currentItem = (Movie) getItem(position);
+
+                    // get the TextView for item name and item description
+                    ImageView imageViewMovie = (ImageView)
+                            convertView.findViewById(R.id.imgMovie);
+                    TextView textViewMovieName = (TextView)
+                            convertView.findViewById(R.id.lblMovieName);
+                    TextView textViewMovieDescription = (TextView)
+                            convertView.findViewById(R.id.lblMovieDescription);
+                    TextView textViewMovieRelease = (TextView)
+                            convertView.findViewById(R.id.lblMovieRelease);
+                    TextView textViewMovieRating = (TextView)
+                            convertView.findViewById(R.id.lblMovieReview);
+
+                    // Sets the text and image for movie from the current movie object
+                    textViewMovieName.setText(currentItem.getTitle());
+                    textViewMovieDescription.setText(currentItem.getDescription());
+                    textViewMovieRelease.setText(currentItem.getRelease());
+                    textViewMovieRating.setText(currentItem.getRating());
+                    Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
+                }
             }
-
-            // get current item to be displayed
-            Movie currentItem = (Movie) getItem(position);
-
-            // get the TextView for item name and item description
-            ImageView imageViewMovie = (ImageView)
-                    convertView.findViewById(R.id.imgMovie);
-            TextView textViewMovieName = (TextView)
-                    convertView.findViewById(R.id.lblMovieName);
-            TextView textViewMovieDescription = (TextView)
-                    convertView.findViewById(R.id.lblMovieDescription);
-            TextView textViewMovieRelease = (TextView)
-                    convertView.findViewById(R.id.lblMovieRelease);
-            TextView textViewMovieRating = (TextView)
-                    convertView.findViewById(R.id.lblMovieReview);
-
-            // Sets the text and image for movie from the current movie object
-            textViewMovieName.setText(currentItem.getTitle());
-            textViewMovieDescription.setText(currentItem.getDescription());
-            textViewMovieRelease.setText(currentItem.getRelease());
-            textViewMovieRating.setText(currentItem.getRating());
-            Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
 
             // returns the view for the current row
             return convertView;

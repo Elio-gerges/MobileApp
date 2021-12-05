@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:layout_margin="10dp">
+
+    <RelativeLayout
+        android:id="@+id/btnFirstMovie"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/imgFirstMovie"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/no_img" />
+
+        <TextView
+            android:id="@+id/lblFirstMovie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="No Movie"
+            android:textColor="#FFFFFF"
+            android:textAlignment="textStart"
+            android:textSize="25dp"
+            android:layout_margin="20dp"/>
+    </RelativeLayout>
+
+</RelativeLayout>
