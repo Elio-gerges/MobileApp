@@ -75,4 +75,18 @@ public class Movie {
     public void setTrailer(String trailer) {
         this.trailer = trailer;
     }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", year='" + year + '\'' +
+                ", rating='" + rating + '\'' +
+                ", description='" + description + '\'' +
+                ", release='" + release + '\'' +
+                ", image_url='" + image_url + '\'' +
+                ", trailer='" + trailer + '\'' +
+                '}';
+    }
 }

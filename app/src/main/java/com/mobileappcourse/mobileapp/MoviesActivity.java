@@ -1,11 +1,10 @@
-package fragments;
+package com.mobileappcourse.mobileapp;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +20,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.mobileappcourse.api.APIRequest;
 import com.mobileappcourse.beans.Movie;
-import com.mobileappcourse.mobileapp.MainActivity;
-import com.mobileappcourse.mobileapp.MovieActivity;
-import com.mobileappcourse.mobileapp.R;
 import com.mobileappcourse.utilities.Constants;
 import com.squareup.picasso.Picasso;
 
@@ -35,51 +31,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HomeFragment extends Fragment {
+public class MoviesActivity extends AppCompatActivity {
 
-    private static Context mcontext;
-
-    private final String TAG = "HomeFragment";
-
+    private Context mcontext;
     private ArrayList<Movie> movies = new ArrayList<Movie>();
 
-    private int movieTotal;
-
-    public HomeFragment() {
-        // Required empty public constructor
-    }
-
-
-    public static HomeFragment newInstance(Context context) {
-        HomeFragment fragment = new HomeFragment();
-        mcontext = context;
-        return fragment;
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_movies);
+        mcontext = getApplicationContext();
+
+        Intent intent = getIntent();
+        getAPIData(intent.getStringExtra("genre"));
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        getAPIData();
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
-
-    private void getAPIData() {
+    private void getAPIData(String genre) {
         Response.Listener<JSONObject> jsonObjectListener = new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray moviesData = response.getJSONArray("results");
-                    movieTotal = response.getInt("count");
-                    for (int i = 0; i < movieTotal; i++) {
+                    for (int i = 0; i < 50; i++) {
                         getMovieDataFromAPI(moviesData.getJSONObject(i).getString("imdb_id"));
                     }
-                    ListView moviesList = getView().findViewById(R.id.lstMovies);
-                    moviesList.setAdapter(new MovieAdapter(mcontext, movies, movieTotal));
+                    ListView moviesList = findViewById(R.id.lstMoviesFromCat);
+                    moviesList.setAdapter(new MovieAdapter(mcontext, movies));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -89,7 +66,7 @@ public class HomeFragment extends Fragment {
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error);
+                Log.d("TAG", "onErrorResponse: " + error);
                 Toast.makeText(mcontext, error.getMessage(), Toast.LENGTH_LONG);
             }
         };
@@ -97,7 +74,7 @@ public class HomeFragment extends Fragment {
         Map<String, String> headerParams = new HashMap<String, String>();
         headerParams.put(Constants.API_KEY_NAME, Constants.API_KEY_VALUE);
 
-        String url = Constants.BASE_URL + "/order/upcoming/";
+        String url = Constants.BASE_URL + "/byGen/" + genre + "/";
 
         try {
             APIRequest.getInstance(mcontext).sendRequest(
@@ -126,18 +103,7 @@ public class HomeFragment extends Fragment {
                     movie.setTitle(movieObject.getString("title"));
                     movie.setImage_url(movieObject.getString("image_url"));
                     movie.setRelease(movieObject.getString("release"));
-                    boolean found = false;
-                    for (int i = 0; i < movies.size(); i++) {
-                        if(movies.get(i).getId().equals(movie.getId())) {
-                            found = true;
-                        }
-                    }
-                    if (found == false) {
-                        movies.add(movie);
-                        if (movies.size() == movieTotal) {
-                            ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
-                        }
-                    }
+                    ((BaseAdapter) MovieAdapter.getAdapter()).notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -147,7 +113,7 @@ public class HomeFragment extends Fragment {
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "onErrorResponse: " + error);
+                Log.d("TAG", "onErrorResponse: " + error);
                 Toast.makeText(mcontext, error.getMessage(), Toast.LENGTH_LONG);
             }
         };
@@ -173,15 +139,13 @@ public class HomeFragment extends Fragment {
 
     private static class MovieAdapter extends BaseAdapter {
 
-        private int total;
-        private Context context; // Context
+        private Context mcontext; // Context
         private ArrayList<Movie> items; // Data source of the list adapter
         private static BaseAdapter adapter;
-        private static int done;
 
         // Public constructor
-        public MovieAdapter(Context context, ArrayList<Movie> items, int total) {
-            this.context = context;
+        public MovieAdapter(Context context, ArrayList<Movie> items) {
+            this.mcontext = context;
             this.items = items;
             this.adapter = this;
         }
@@ -207,56 +171,32 @@ public class HomeFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-//            if(total == 0) {
-//                for (int i = 0; i < items.size(); i++) {
-//                    Log.d("getView", "Movie " + i + " is:" + items.get(i).getTitle());
-//                }
-//                total++;
-//            }
-
-            // get current item to be displayed
             Movie currentItem = (Movie) getItem(position);
 
             // Inflate the layout for each list row
             if (convertView == null) {
-                if (done == 0) {
-                    // Display big first movie
-                    convertView = LayoutInflater.from(parent.getContext())
-                                    .inflate(R.layout.movie_banner, parent, false);
+                // Display regular movies
+                convertView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.movie, parent, false);
 
-                    // get the TextView for item name and item description
-                    ImageView imageViewMovie = (ImageView)
-                            convertView.findViewById(R.id.imgFirstMovie);
-                    TextView textViewMovieName = (TextView)
-                            convertView.findViewById(R.id.lblFirstMovie);
+                // get the TextView for item name and item description
+                ImageView imageViewMovie = (ImageView)
+                        convertView.findViewById(R.id.imgMovie);
+                TextView textViewMovieName = (TextView)
+                        convertView.findViewById(R.id.lblMovieName);
+                TextView textViewMovieDescription = (TextView)
+                        convertView.findViewById(R.id.lblMovieDescription);
+                TextView textViewMovieRelease = (TextView)
+                        convertView.findViewById(R.id.lblMovieRelease);
+                TextView textViewMovieRating = (TextView)
+                        convertView.findViewById(R.id.lblMovieReview);
 
-                    textViewMovieName.setText(currentItem.getTitle());
-                    Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
-                    done++;
-                } else {
-                    // Display regular movies
-                    convertView = LayoutInflater.from(parent.getContext())
-                                    .inflate(R.layout.movie, parent, false);
-
-                    // get the TextView for item name and item description
-                    ImageView imageViewMovie = (ImageView)
-                            convertView.findViewById(R.id.imgMovie);
-                    TextView textViewMovieName = (TextView)
-                            convertView.findViewById(R.id.lblMovieName);
-                    TextView textViewMovieDescription = (TextView)
-                            convertView.findViewById(R.id.lblMovieDescription);
-                    TextView textViewMovieRelease = (TextView)
-                            convertView.findViewById(R.id.lblMovieRelease);
-                    TextView textViewMovieRating = (TextView)
-                            convertView.findViewById(R.id.lblMovieReview);
-
-                    // Sets the text and image for movie from the current movie object
-                    textViewMovieName.setText(currentItem.getTitle());
-                    textViewMovieDescription.setText(currentItem.getDescription());
-                    textViewMovieRelease.setText(currentItem.getRelease());
-                    textViewMovieRating.setText(currentItem.getRating());
-                    Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
-                }
+                // Sets the text and image for movie from the current movie object
+                textViewMovieName.setText(currentItem.getTitle());
+                textViewMovieDescription.setText(currentItem.getDescription());
+                textViewMovieRelease.setText(currentItem.getRelease());
+                textViewMovieRating.setText(currentItem.getRating());
+                Picasso.get().load(currentItem.getImage_url()).into(imageViewMovie);
             }
 
             convertView.setOnClickListener(new View.OnClickListener() {

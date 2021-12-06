@@ -40,13 +40,13 @@ public class MainActivity extends AppCompatActivity {
                             selectedFragment = HomeFragment.newInstance(getApplicationContext());
                             break;
                         case R.id.nav_favorite:
-                            selectedFragment = new FavoriteFragment();
+                            selectedFragment = FavoriteFragment.newInstance(getApplicationContext());
                             break;
                         case R.id.nav_video:
                             selectedFragment = new VideoFragment();
                             break;
                         case R.id.nav_category:
-                            selectedFragment = new CategoryFragment();
+                            selectedFragment = CategoryFragment.newInstance(getApplicationContext());
                             break;
                     }
 

@@ -4,10 +4,13 @@
     android:layout_height="match_parent"
     tools:context="fragments.CategoryFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <GridView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Category" />
+        android:layout_height="wrap_content"
+        android:id="@+id/lstCategories"
+        android:horizontalSpacing="6dp"
+        android:numColumns="2"
+        android:verticalSpacing="6dp"
+        />
 
 </FrameLayout>
